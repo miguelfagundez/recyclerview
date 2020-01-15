@@ -1,5 +1,12 @@
 package com.devproject.fagundezdev.recyclerviewimages;
 
+/*
+ * Class name: Friend
+ * Model class for handling values for recyclerview
+ * @author Miguel Fagundez
+ * @version 1.0
+ * @since January 2020
+ * */
 public class Friend {
 
     private String fName;

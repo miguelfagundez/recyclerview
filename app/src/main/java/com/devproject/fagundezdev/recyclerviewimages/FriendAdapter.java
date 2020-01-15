@@ -13,27 +13,42 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+/*
+ * Class name: FriendAdapter
+ * Basic adapter class extending from RecyclerView.Adapter
+ * Having access to the view using custom ViewHolder
+ * @author Miguel Fagundez
+ * @version 1.0
+ * @since January 2020
+ * */
 public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
 
+    // Members for having access to the data
     private ArrayList<Friend> myFriendList;
 
+    // Constructor
     public FriendAdapter(ArrayList<Friend> myFriendList) {
         this.myFriendList = myFriendList;
     }
 
+    // I inflate the layout and return a holder
     @NonNull
     @Override
     public FriendAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
+        // Taking the context from the parent and inflate the friend layout
         View view = (View) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_friend,parent,false);
 
+        // Create a new ViewHolder and return it
         return new FriendAdapter.ViewHolder(view);
     }
 
+    // Using the Holder, I have access to the data
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Friend friend = myFriendList.get(position);
         holder.name.setText(friend.getfName() + " " + friend.getlName());
+        // Using Picasso for managing the url
         Picasso.get().load(friend.getUrl()).into(holder.image);
     }
 
@@ -42,12 +57,15 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         return myFriendList.size();
     }
 
+    // Provide a direct reference to the views
     public static class ViewHolder extends RecyclerView.ViewHolder{
 
+        // Every component of the view
         public final View view;
         public final TextView name;
         public final ImageView image;
 
+        // ViewHolder constructor
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 

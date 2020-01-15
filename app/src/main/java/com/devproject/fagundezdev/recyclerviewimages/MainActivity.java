@@ -9,18 +9,42 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
+/*
+* Class name: MainActivity
+* Base class
+* @author Miguel Fagundez
+* @version 1.0
+* @since January 2020
+* */
 public class MainActivity extends AppCompatActivity {
 
+    // Base URL for testing
+    private static final String URL_TAG = "https://randomuser.me/api?results=10";
+    private static final String TAG = "MainActivity_onResponse";
+
+    // Members
     private RecyclerView rvFriends;
     private RecyclerView.Adapter adapter;
+
+    // Client used to connect with the URL_TAG
+    private OkHttpClient okHttp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Connect with the URL_TAG and wait for response
+        okHttp = new OkHttpClient();
+        connectHttp(URL_TAG);
+
         ArrayList<Friend> friends = initFriends();
 
         rvFriends = (RecyclerView) findViewById(R.id.recyclerId);
@@ -46,6 +74,26 @@ public class MainActivity extends AppCompatActivity {
         adapter = new FriendAdapter(friends);
         rvFriends.setAdapter(adapter);
 
+    }
+
+    private void connectHttp(String url) {
+        // Requesting access to URL
+        Request request = new Request.Builder().url(url).build();
+        // Connecting with URL
+        okHttp.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                // if error happen
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                // if a response is received
+                final String strResponse = response.body().string();
+                Log.d(TAG, "Information unparsed" + strResponse);
+            }
+        });
     }
 
     private ArrayList<Friend> initFriends(){
