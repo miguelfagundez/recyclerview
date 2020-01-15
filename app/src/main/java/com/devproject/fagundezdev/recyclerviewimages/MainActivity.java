@@ -40,7 +40,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     // Base URL for testing
-    private static final String URL_TAG = "https://randomuser.me/api?results=3";
+    private static final String URL_TAG = "https://randomuser.me/api?results=2";
     private static final String TAG = "MainActivity_onResponse";
 
     // Members
@@ -99,8 +99,25 @@ public class MainActivity extends AppCompatActivity {
                 Gson gsonObject = new Gson();
                 // Getting the data
                 final Example example = gsonObject.fromJson(strResponse,Example.class);
+                Log.d(TAG, "Information - Number of friends (example): " + example.getResults().size());
+                // NEW CODE HERE
+                /*Thread thread = new Thread(){
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //newInitFriends(example);
+                            }
+                        });
+                    }
+                };
+                thread.start();*/
+                //ParsingData data = (ParsingData) new ParsingData().execute(example);
+                //friends = data.getFriends();
+                Log.d(TAG, "Information - Number of friends: " + friends.size());
                 //newInitFriends(example);
-                Log.d(TAG, "Information Parsed" + example.getResults().get(0).getName().getFirst()
+                Log.d(TAG, "Information after Parsed: " + example.getResults().get(0).getName().getFirst()
                         + " " + example.getResults().get(0).getName().getLast());
             }
         });
