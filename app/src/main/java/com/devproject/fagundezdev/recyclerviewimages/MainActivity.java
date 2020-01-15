@@ -2,8 +2,11 @@ package com.devproject.fagundezdev.recyclerviewimages;
 
 import android.os.Bundle;
 
+import com.devproject.fagundezdev.recyclerviewimages.model.Example;
+import com.devproject.fagundezdev.recyclerviewimages.model.Result;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -25,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /*
 * Class name: MainActivity
@@ -36,12 +40,14 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     // Base URL for testing
-    private static final String URL_TAG = "https://randomuser.me/api?results=10";
+    private static final String URL_TAG = "https://randomuser.me/api?results=3";
     private static final String TAG = "MainActivity_onResponse";
 
     // Members
     private RecyclerView rvFriends;
     private RecyclerView.Adapter adapter;
+
+    private ArrayList<Friend> friends = new ArrayList<>();
 
     // Client used to connect with the URL_TAG
     private OkHttpClient okHttp;
@@ -67,13 +73,12 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayList<Friend> friends = initFriends();
 
-        rvFriends = (RecyclerView) findViewById(R.id.recyclerId);
+        rvFriends = findViewById(R.id.recyclerId);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this);
         rvFriends.setLayoutManager(manager);
 
         adapter = new FriendAdapter(friends);
         rvFriends.setAdapter(adapter);
-
     }
 
     private void connectHttp(String url) {
@@ -91,9 +96,27 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 // if a response is received
                 final String strResponse = response.body().string();
-                Log.d(TAG, "Information unparsed" + strResponse);
+                Gson gsonObject = new Gson();
+                // Getting the data
+                final Example example = gsonObject.fromJson(strResponse,Example.class);
+                //newInitFriends(example);
+                Log.d(TAG, "Information Parsed" + example.getResults().get(0).getName().getFirst()
+                        + " " + example.getResults().get(0).getName().getLast());
             }
         });
+    }
+
+    private void newInitFriends(Example example){
+        int numberFriends = example.getResults().size();
+        Friend friend;
+
+        for (int i = 0; i < numberFriends; i++){
+            friend = new Friend(
+                    example.getResults().get(i).getName().getFirst(),
+                    example.getResults().get(i).getName().getLast(),
+                    example.getResults().get(i).getPicture().getLarge());
+            friends.add(friend);
+        }
     }
 
     private ArrayList<Friend> initFriends(){
@@ -111,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         listFriends.add(new Friend("Silvester","Reuter","https://randomuser.me/api/portraits/men/53.jpg"));
         listFriends.add(new Friend("Marilou","Lecomte","https://randomuser.me/api/portraits/women/75.jpg"));
         listFriends.add(new Friend("Raymond","Eifler","https://randomuser.me/api/portraits/men/38.jpg"));
-        listFriends.add(new Friend("Miranda","Gonzalez","https://randomuser.me/api/portraits/women/64.jpg"));
+        listFriends.add(new Friend("Miranda","Gonzalez","https://randomuser.me/api/portraits/women/66.jpg"));
         listFriends.add(new Friend("Ellen","Anderson","https://randomuser.me/api/portraits/women/89.jpg"));
         return listFriends;
     }
