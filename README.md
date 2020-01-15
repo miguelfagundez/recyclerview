@@ -1,3 +1,3 @@
 # RecyclerView
 
-Step by step how to use RecyclerView, Picasso, and OkHttp.
+Step by step how to use RecyclerView, Picasso, Retrofit, and OkHttp.
