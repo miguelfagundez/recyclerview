@@ -31,16 +31,20 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         this.myFriendList = myFriendList;
     }
 
+    public void updateFriends(ArrayList<Friend> myFriends){
+        myFriendList = myFriends;
+        notifyDataSetChanged();
+    }
     // I inflate the layout and return a holder
     @NonNull
     @Override
-    public FriendAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         // Taking the context from the parent and inflate the friend layout
-        View view = (View) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_friend,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_friend,parent,false);
 
         // Create a new ViewHolder and return it
-        return new FriendAdapter.ViewHolder(view);
+        return new ViewHolder(view);
     }
 
     // Using the Holder, I have access to the data
@@ -54,14 +58,13 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return myFriendList.size();
+        return myFriendList == null ? 0 : myFriendList.size();
     }
 
     // Provide a direct reference to the views
     public static class ViewHolder extends RecyclerView.ViewHolder{
 
         // Every component of the view
-        public final View view;
         public final TextView name;
         public final ImageView image;
 
@@ -69,7 +72,6 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            this.view = itemView;
             this.name = itemView.findViewById(R.id.tvName);
             this.image = itemView.findViewById(R.id.ivImage);
         }

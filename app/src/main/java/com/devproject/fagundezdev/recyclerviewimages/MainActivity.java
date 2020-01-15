@@ -3,9 +3,7 @@ package com.devproject.fagundezdev.recyclerviewimages;
 import android.os.Bundle;
 
 import com.devproject.fagundezdev.recyclerviewimages.model.Example;
-import com.devproject.fagundezdev.recyclerviewimages.model.Result;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +15,8 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import android.util.Log;
 import android.view.View;
@@ -28,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /*
 * Class name: MainActivity
@@ -40,17 +39,21 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     // Base URL for testing
-    private static final String URL_TAG = "https://randomuser.me/api?results=2";
+    //private static final String URL_TAG = "https://randomuser.me/api?results=20";
+    private static final String URL_TAG = "https://randomuser.me";
     private static final String TAG = "MainActivity_onResponse";
 
     // Members
     private RecyclerView rvFriends;
-    private RecyclerView.Adapter adapter;
+    private FriendAdapter adapter;
 
-    private ArrayList<Friend> friends = new ArrayList<>();
+    //private ArrayList<Friend> friends = new ArrayList<>(0);
 
     // Client used to connect with the URL_TAG
     private OkHttpClient okHttp;
+
+    // Retrofit
+    private Retrofit retrofit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,21 +67,60 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getApplicationContext(),"Feature no implemented yet!",Toast.LENGTH_SHORT).show();
+
             }
         });
 
-        // Connect with the URL_TAG and wait for response
-        okHttp = new OkHttpClient();
-        connectHttp(URL_TAG);
+        //***************
+        // OkHttp option
+        //***************
+        /*okHttp = new OkHttpClient();
+        connectHttp(URL_TAG);*/
 
-        ArrayList<Friend> friends = initFriends();
+        //*****************
+        // Retrofit option
+        //*****************
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        retrofit = new retrofit2.Retrofit.Builder()
+                .baseUrl(URL_TAG)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(httpClient.build())
+                .build();
+        connectRetrofit(URL_TAG);
+
+        ArrayList<Friend> friends = new ArrayList<>(0);
 
         rvFriends = findViewById(R.id.recyclerId);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this);
         rvFriends.setLayoutManager(manager);
-
         adapter = new FriendAdapter(friends);
         rvFriends.setAdapter(adapter);
+    }
+
+    private void connectRetrofit(String urlTag) {
+        RandomUserService service = retrofit.create(RandomUserService.class);
+        retrofit2.Call<ArrayList<Friend>> call = service.getFriends();
+        call.enqueue(new retrofit2.Callback<ArrayList<Friend>>() {
+            @Override
+            public void onResponse(retrofit2.Call<ArrayList<Friend>> call, retrofit2.Response<ArrayList<Friend>> response) {
+                retrofitInitFriends(response.body());
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<ArrayList<Friend>> call, Throwable t) {
+                Log.d(TAG,"Error calling...");
+                t.printStackTrace();
+            }
+        });
+    }
+
+    private void retrofitInitFriends(ArrayList<Friend> list){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.updateFriends(list);
+            }
+        });
     }
 
     private void connectHttp(String url) {
@@ -98,34 +140,28 @@ public class MainActivity extends AppCompatActivity {
                 final String strResponse = response.body().string();
                 Gson gsonObject = new Gson();
                 // Getting the data
-                final Example example = gsonObject.fromJson(strResponse,Example.class);
+                final Example example = gsonObject.fromJson(strResponse, Example.class);
                 Log.d(TAG, "Information - Number of friends (example): " + example.getResults().size());
                 // NEW CODE HERE
-                /*Thread thread = new Thread(){
+                final ArrayList<Friend> friends = newInitFriends(example);
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //newInitFriends(example);
-                            }
-                        });
+                        adapter.updateFriends(friends);
                     }
-                };
-                thread.start();*/
-                //ParsingData data = (ParsingData) new ParsingData().execute(example);
-                //friends = data.getFriends();
-                Log.d(TAG, "Information - Number of friends: " + friends.size());
+                });
                 //newInitFriends(example);
+                Log.d(TAG, "Information - Number of friends: " + friends.size());
                 Log.d(TAG, "Information after Parsed: " + example.getResults().get(0).getName().getFirst()
                         + " " + example.getResults().get(0).getName().getLast());
             }
         });
     }
 
-    private void newInitFriends(Example example){
+    private ArrayList<Friend> newInitFriends(Example example){
         int numberFriends = example.getResults().size();
         Friend friend;
+        ArrayList<Friend> friends = new ArrayList<>();
 
         for (int i = 0; i < numberFriends; i++){
             friend = new Friend(
@@ -134,26 +170,8 @@ public class MainActivity extends AppCompatActivity {
                     example.getResults().get(i).getPicture().getLarge());
             friends.add(friend);
         }
-    }
 
-    private ArrayList<Friend> initFriends(){
-
-        ArrayList<Friend> listFriends = new ArrayList<>();
-
-        listFriends.add(new Friend("Erin","Staley","https://randomuser.me/api/portraits/women/64.jpg"));
-        listFriends.add(new Friend("George","Ramos","https://randomuser.me/api/portraits/men/81.jpg"));
-        listFriends.add(new Friend("Erik","Gregory","https://randomuser.me/api/portraits/men/31.jpg"));
-        listFriends.add(new Friend("Marianne","Sirko","https://randomuser.me/api/portraits/women/23.jpg"));
-        listFriends.add(new Friend("Ryder","Lee","https://randomuser.me/api/portraits/men/42.jpg"));
-        listFriends.add(new Friend("Una","Bostad","https://randomuser.me/api/portraits/women/73.jpg"));
-        listFriends.add(new Friend("Andréa","Bernard","https://randomuser.me/api/portraits/women/27.jpg"));
-        listFriends.add(new Friend("Ljiljana","Roy","https://randomuser.me/api/portraits/women/86.jpg"));
-        listFriends.add(new Friend("Silvester","Reuter","https://randomuser.me/api/portraits/men/53.jpg"));
-        listFriends.add(new Friend("Marilou","Lecomte","https://randomuser.me/api/portraits/women/75.jpg"));
-        listFriends.add(new Friend("Raymond","Eifler","https://randomuser.me/api/portraits/men/38.jpg"));
-        listFriends.add(new Friend("Miranda","Gonzalez","https://randomuser.me/api/portraits/women/66.jpg"));
-        listFriends.add(new Friend("Ellen","Anderson","https://randomuser.me/api/portraits/women/89.jpg"));
-        return listFriends;
+        return friends;
     }
 
     @Override

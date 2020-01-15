@@ -20,7 +20,7 @@ public class Location {
     private String country;
     @SerializedName("postcode")
     @Expose
-    private Integer postcode;
+    private String postcode;
     @SerializedName("coordinates")
     @Expose
     private Coordinates coordinates;
@@ -45,7 +45,7 @@ public class Location {
      * @param coordinates
      * @param state
      */
-    public Location(Street street, String city, String state, String country, Integer postcode, Coordinates coordinates, Timezone timezone) {
+    public Location(Street street, String city, String state, String country, String postcode, Coordinates coordinates, Timezone timezone) {
         super();
         this.street = street;
         this.city = city;
@@ -88,11 +88,11 @@ public class Location {
         this.country = country;
     }
 
-    public Integer getPostcode() {
+    public String getPostcode() {
         return postcode;
     }
 
-    public void setPostcode(Integer postcode) {
+    public void setPostcode(String postcode) {
         this.postcode = postcode;
     }
 
