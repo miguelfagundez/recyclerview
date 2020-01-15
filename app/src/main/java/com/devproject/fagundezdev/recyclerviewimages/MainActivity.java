@@ -39,15 +39,15 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     // Base URL for testing
+    // OkHttp option
     //private static final String URL_TAG = "https://randomuser.me/api?results=20";
+    // Retrofit option
     private static final String URL_TAG = "https://randomuser.me";
     private static final String TAG = "MainActivity_onResponse";
 
     // Members
     private RecyclerView rvFriends;
     private FriendAdapter adapter;
-
-    //private ArrayList<Friend> friends = new ArrayList<>(0);
 
     // Client used to connect with the URL_TAG
     private OkHttpClient okHttp;
@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(getApplicationContext(),"Feature no implemented yet!",Toast.LENGTH_SHORT).show();
-
             }
         });
 
@@ -99,28 +98,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void connectRetrofit(String urlTag) {
         RandomUserService service = retrofit.create(RandomUserService.class);
-        retrofit2.Call<ArrayList<Friend>> call = service.getFriends();
-        call.enqueue(new retrofit2.Callback<ArrayList<Friend>>() {
+        retrofit2.Call<Example> call = service.getFriends();
+        call.enqueue(new retrofit2.Callback<Example>() {
             @Override
-            public void onResponse(retrofit2.Call<ArrayList<Friend>> call, retrofit2.Response<ArrayList<Friend>> response) {
+            public void onResponse(retrofit2.Call<Example> call, retrofit2.Response<Example> response) {
                 retrofitInitFriends(response.body());
             }
 
             @Override
-            public void onFailure(retrofit2.Call<ArrayList<Friend>> call, Throwable t) {
+            public void onFailure(retrofit2.Call<Example> call, Throwable t) {
                 Log.d(TAG,"Error calling...");
                 t.printStackTrace();
             }
         });
     }
 
-    private void retrofitInitFriends(ArrayList<Friend> list){
+    private ArrayList<Friend> retrofitInitFriends(Example list){
+        final ArrayList<Friend> friends = newInitFriends(list);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                adapter.updateFriends(list);
+                adapter.updateFriends(friends);
             }
         });
+
+        return null;
     }
 
     private void connectHttp(String url) {
