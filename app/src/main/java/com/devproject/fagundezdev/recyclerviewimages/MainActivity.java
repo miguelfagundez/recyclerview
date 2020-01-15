@@ -96,13 +96,16 @@ public class MainActivity extends AppCompatActivity {
         rvFriends.setAdapter(adapter);
     }
 
+    //*****************
+    // Retrofit option
+    //*****************
     private void connectRetrofit(String urlTag) {
         RandomUserService service = retrofit.create(RandomUserService.class);
         retrofit2.Call<Example> call = service.getFriends();
         call.enqueue(new retrofit2.Callback<Example>() {
             @Override
             public void onResponse(retrofit2.Call<Example> call, retrofit2.Response<Example> response) {
-                retrofitInitFriends(response.body());
+                lookingFriends(response.body());
             }
 
             @Override
@@ -113,18 +116,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private ArrayList<Friend> retrofitInitFriends(Example list){
-        final ArrayList<Friend> friends = newInitFriends(list);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                adapter.updateFriends(friends);
-            }
-        });
 
-        return null;
-    }
-
+    //*****************
+    // OkHttp option
+    //*****************
     private void connectHttp(String url) {
         // Requesting access to URL
         Request request = new Request.Builder().url(url).build();
@@ -141,35 +136,41 @@ public class MainActivity extends AppCompatActivity {
                 // if a response is received
                 final String strResponse = response.body().string();
                 Gson gsonObject = new Gson();
-                // Getting the data
-                final Example example = gsonObject.fromJson(strResponse, Example.class);
-                Log.d(TAG, "Information - Number of friends (example): " + example.getResults().size());
-                // NEW CODE HERE
-                final ArrayList<Friend> friends = newInitFriends(example);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.updateFriends(friends);
-                    }
-                });
-                //newInitFriends(example);
-                Log.d(TAG, "Information - Number of friends: " + friends.size());
-                Log.d(TAG, "Information after Parsed: " + example.getResults().get(0).getName().getFirst()
-                        + " " + example.getResults().get(0).getName().getLast());
+                // Getting the data using a gson object
+                final Example list = gsonObject.fromJson(strResponse, Example.class);
+                lookingFriends(list);
             }
         });
     }
 
-    private ArrayList<Friend> newInitFriends(Example example){
-        int numberFriends = example.getResults().size();
+    //*********************************************
+    // Create this method to looking into the data
+    // This method is used in both options
+    //*********************************************
+    private void lookingFriends(Example list){
+        final ArrayList<Friend> friends = initFriends(list);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.updateFriends(friends);
+            }
+        });
+    }
+
+    //*********************************************
+    // Create this method to initialize my data using only OkHttp library
+    // This method is used in both options
+    //*********************************************
+    private ArrayList<Friend> initFriends(Example list){
+        int numberFriends = list.getResults().size();
         Friend friend;
         ArrayList<Friend> friends = new ArrayList<>();
 
         for (int i = 0; i < numberFriends; i++){
             friend = new Friend(
-                    example.getResults().get(i).getName().getFirst(),
-                    example.getResults().get(i).getName().getLast(),
-                    example.getResults().get(i).getPicture().getLarge());
+                    list.getResults().get(i).getName().getFirst(),
+                    list.getResults().get(i).getName().getLast(),
+                    list.getResults().get(i).getPicture().getLarge());
             friends.add(friend);
         }
 

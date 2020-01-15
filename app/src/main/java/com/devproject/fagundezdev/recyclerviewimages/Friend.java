@@ -14,12 +14,18 @@ public class Friend {
     private String url;
 
 
+    /*
+    * Constructor
+    * */
     public Friend(String fName, String lName, String url) {
         this.fName = fName;
         this.lName = lName;
         this.url = url;
     }
 
+    /*
+    * Getters and Setters
+    * */
     public String getfName() {
         return fName;
     }
